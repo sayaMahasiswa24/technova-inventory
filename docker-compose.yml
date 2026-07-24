@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # 1. Database PostgreSQL
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: technova_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin_technova
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: technova_inventory_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - technova-network
+
+  # 2. Backend API (AdonisJS)
+  backend-api:
+    build:
+      context: ./backend-service
+      dockerfile: Dockerfile
+    container_name: technova_backend
+    restart: always
+    ports:
+      - "3333:3333"
+    environment:
+      PORT: 3333
+      HOST: 0.0.0.0
+      NODE_ENV: development
+      DB_HOST: postgres-db # <-- PENTING: Bisa langsung memanggil nama service kontainer!
+      DB_PORT: 5432
+      DB_USER: admin_technova
+      DB_PASSWORD: secretpassword
+      DB_DATABASE: technova_inventory_db
+    depends_on:
+      - postgres-db
+    networks:
+      - technova-network
+
+  # 3. Frontend Web (React + Nginx)
+  frontend-web:
+    build:
+      context: ./frontend-app
+      dockerfile: Dockerfile
+    container_name: technova_frontend
+    restart: always
+    ports:
+      - "5173:80" # Akses di browser lewat port 5173, diteruskan ke port 80 Nginx
+    depends_on:
+      - backend-api
+    networks:
+      - technova-network
+
+# 4. Prometheus (Metrics Server)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: technova_prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - technova-network
+
+  # 5. Loki (Log Aggregation)
+  loki:
+    image: grafana/loki:latest
+    container_name: technova_loki
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/mnt/config/loki-config.yml
+    command: -config.file=/mnt/config/loki-config.yml
+    networks:
+      - technova-network
+
+  # 6. Promtail (Log Collector)
+  promtail:
+    image: grafana/promtail:latest
+    container_name: technova_promtail
+    restart: always
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./monitoring/promtail-config.yml:/mnt/config/promtail-config.yml
+    command: -config.file=/mnt/config/promtail-config.yml
+    depends_on:
+      - loki
+    networks:
+      - technova-network
+
+  # 7. Grafana (Visualization Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: technova_grafana
+    restart: always
+    ports:
+      - "3005:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - technova-network
+
+# Jaringan internal agar antar-kontainer bisa saling komunikasi
+networks:
+  technova-network:
+    driver: bridge
+
+volumes:
+  pgdata:
