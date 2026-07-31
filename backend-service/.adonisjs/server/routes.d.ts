@@ -4,6 +4,7 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
+    'metrics.index': { paramsTuple?: []; params?: {} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'categories.store': { paramsTuple?: []; params?: {} }
     'items.index': { paramsTuple?: []; params?: {} }
@@ -12,11 +13,13 @@ export type ScannedRoutes = {
     'stock_transactions.store': { paramsTuple?: []; params?: {} }
   }
   GET: {
+    'metrics.index': { paramsTuple?: []; params?: {} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'items.index': { paramsTuple?: []; params?: {} }
     'stock_transactions.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
+    'metrics.index': { paramsTuple?: []; params?: {} }
     'categories.index': { paramsTuple?: []; params?: {} }
     'items.index': { paramsTuple?: []; params?: {} }
     'stock_transactions.index': { paramsTuple?: []; params?: {} }

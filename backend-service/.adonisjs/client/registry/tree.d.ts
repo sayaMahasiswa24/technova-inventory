@@ -2,6 +2,9 @@
 import type { routes } from './index.ts'
 
 export interface ApiDefinition {
+  metrics: {
+    index: typeof routes['metrics.index']
+  }
   categories: {
     index: typeof routes['categories.index']
     store: typeof routes['categories.store']
