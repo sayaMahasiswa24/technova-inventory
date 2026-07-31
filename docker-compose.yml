@@ -30,7 +30,13 @@ services:
       PORT: 3333
       HOST: 0.0.0.0
       NODE_ENV: development
-      DB_HOST: postgres-db # <-- PENTING: Bisa langsung memanggil nama service kontainer!
+      
+      LOG_LEVEL: info
+      APP_KEY: jK8v_X9Z-q4mW2pL7yT5cR1nB6sD3fG0 
+      APP_URL: http://localhost:3333
+      SESSION_DRIVER: memory
+      
+      DB_HOST: postgres-db
       DB_PORT: 5432
       DB_USER: admin_technova
       DB_PASSWORD: secretpassword
