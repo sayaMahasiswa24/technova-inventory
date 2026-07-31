@@ -115,6 +115,22 @@ services:
     networks:
       - technova-network
 
+# 8. SonarQube (Code Quality & Security Scanner)
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: technova_sonarqube
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - technova-network 
+
 # Jaringan internal agar antar-kontainer bisa saling komunikasi
 networks:
   technova-network:
@@ -122,3 +138,6 @@ networks:
 
 volumes:
   pgdata:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
